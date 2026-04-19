@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HIT-1.0 - Hierarchical Intent Tree Protocol</title>
+
+<!-- Tailwind CSS via CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<!-- User Provided Tailwind Config -->
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "on-primary-container": "#002f45",
+                    "surface-tint": "#00658e",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed": "#121c28",
+                    "on-primary-fixed": "#001e2e",
+                    "primary-fixed": "#c7e7ff",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#e5e1e4",
+                    "error": "#ba1a1a",
+                    "surface": "#f9f9f9",
+                    "on-background": "#1a1c1c",
+                    "on-tertiary-fixed-variant": "#3e4755",
+                    "inverse-on-surface": "#f1f1f1",
+                    "primary-fixed-dim": "#83cfff",
+                    "on-secondary-container": "#656466",
+                    "secondary-fixed-dim": "#c8c6c8",
+                    "inverse-surface": "#2f3131",
+                    "on-primary-fixed-variant": "#004c6c",
+                    "inverse-primary": "#83cfff",
+                    "secondary-container": "#e5e1e4",
+                    "tertiary": "#555f6d",
+                    "on-surface-variant": "#3f484f",
+                    "surface-container-high": "#e8e8e8",
+                    "error-container": "#ffdad6",
+                    "outline": "#6f7880",
+                    "surface-container": "#eeeeee",
+                    "surface-bright": "#f9f9f9",
+                    "on-secondary": "#ffffff",
+                    "tertiary-fixed": "#d9e3f4",
+                    "surface-container-highest": "#e2e2e2",
+                    "surface-container-low": "#f3f3f3",
+                    "primary-container": "#2d9cd3",
+                    "tertiary-container": "#8a94a3",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-container": "#232d39",
+                    "on-secondary-fixed": "#1c1b1d",
+                    "surface-dim": "#dadada",
+                    "tertiary-fixed-dim": "#bdc7d8",
+                    "on-secondary-fixed-variant": "#474649",
+                    "surface-variant": "#e2e2e2",
+                    "primary": "#00658e",
+                    "on-surface": "#1a1c1c",
+                    "secondary": "#5f5e60",
+                    "outline-variant": "#bec8d0",
+                    "background": "#f9f9f9",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff"
+                },
+                fontFamily: {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"],
+                    "mono": ["JetBrains Mono"]
+                },
+                borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+            },
+        },
+    }
+</script>
+
+<style>
+    /* Typography & Core Resets */
+    html { scroll-behavior: smooth; }
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .prose h2 {
+        border-bottom: 1px solid transparent;
+        margin-top: 3rem;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+        color: #1a1c1c;
+    }
+    .prose p {
+        margin-bottom: 1.25rem;
+        line-height: 1.6;
+        color: #3f484f;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #e2e2e2; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #bec8d0; }
+
+    /* Schema Tabs Customization */
+    .schema-tab {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .schema-tab.active {
+        background-color: #00658e;
+        color: #ffffff;
+        font-weight: 600;
+        border-color: #00658e;
+    }
+    
+    /* JSON Syntax Highlighting for Schema Explorer */
+    .schema-json {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        white-space: pre-wrap;
+    }
+    .schema-json .key { color: #8a0c20; font-weight: 600; } 
+    .schema-json .str { color: #02488a; } 
+    .schema-json .num { color: #00658e; }
+    .schema-json .bool { color: #00658e; font-weight: bold; }
+    .schema-json .null { color: #6f7880; font-style: italic; }
+
+    /* Animated SVG Tree Adjustments for Light Mode */
+    .tree-edge { stroke-width: 1.5; stroke: #bec8d0; }
+    .ghost-ring { stroke: rgba(0, 101, 142, 0.8); stroke-width: 2; }
+    .pulse-ring {
+        animation: pulseGhost 2s infinite ease-out;
+    }
+    @keyframes pulseGhost {
+        0% { transform: scale(0.6); opacity: 0.4; }
+        100% { transform: scale(1.4); opacity: 0; }
+    }
+</style>
+</head>
+
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- TopNavBar (Fixed Header) -->
+<header class="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-md border-b border-slate-200 shadow-sm flex items-center justify-between px-6 h-16 max-w-full">
+    <div class="flex items-center gap-8">
+        <a href="#" class="flex items-center gap-2" style="text-decoration: none;">
+            <!-- HIT SVG Logo adapted for light theme headers -->
+            <svg width="22" height="22" viewBox="0 0 26 26" fill="none">
+                <rect width="26" height="26" rx="6" fill="#00658e" />
+                <circle cx="13" cy="7" r="3" fill="white" opacity="0.9"/>
+                <circle cx="7" cy="19" r="3" fill="white" opacity="0.9"/>
+                <circle cx="19" cy="19" r="3" fill="white" opacity="0.9"/>
+                <line x1="13" y1="10" x2="7" y2="16" stroke="white" stroke-width="1.5" opacity="0.6"/>
+                <line x1="13" y1="10" x2="19" y2="16" stroke="white" stroke-width="1.5" opacity="0.6"/>
+            </svg>
+            <span class="text-xl font-bold text-slate-900 tracking-tight">HIT Protocol</span>
+        </a>
+        <nav class="hidden md:flex gap-6 items-center">
+            <a class="text-[#00658e] font-semibold border-b-2 border-[#00658e] duration-200 ease-in-out font-sans antialiased text-sm tracking-tight" href="#">Spec</a>
+            <a class="text-slate-600 hover:text-slate-900 duration-200 ease-in-out font-sans antialiased text-sm tracking-tight" href="#demo">Demo</a>
+            <a class="text-slate-600 hover:text-slate-900 duration-200 ease-in-out font-sans antialiased text-sm tracking-tight" href="https://github.com/hit-protocol/core/tree/main/sdk" target="_blank">SDK</a>
+        </nav>
+    </div>
+    <div class="flex items-center gap-4">
+        <!-- Mock Search Input -->
+        <div class="hidden lg:flex items-center bg-surface-container px-3 py-1.5 rounded-md text-slate-500 gap-2 border border-outline-variant/20">
+            <span class="material-symbols-outlined text-sm">search</span>
+            <span class="text-xs">Search specification...</span>
+            <span class="text-[10px] bg-white border border-slate-200 px-1 rounded ml-4">⌘K</span>
+        </div>
+        <a href="https://github.com" target="_blank" class="p-2 text-slate-600 hover:bg-slate-50 rounded-md transition-colors" title="GitHub"><span class="material-symbols-outlined">code</span></a>
+        <button class="p-2 text-slate-600 hover:bg-slate-50 rounded-md transition-colors" title="Community"><span class="material-symbols-outlined">group</span></button>
+    </div>
+</header>
+
+<div class="flex pt-16 min-h-screen">
+    <!-- Left SideNavBar (Table of Contents) -->
+    <aside class="fixed left-0 top-16 h-[calc(100vh-4rem)] w-72 bg-[#f3f3f3] border-r border-slate-100 hidden lg:flex flex-col p-4 gap-2 overflow-y-auto z-40">
+        <div class="px-3 mb-6">
+            <h2 class="text-lg font-bold text-slate-800 tracking-tight">Protocol Specification</h2>
+            <p class="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mt-0.5">Draft v1.0.0</p>
+        </div>
+        <nav class="space-y-6">
+            <div>
+                <h3 class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Introduction</h3>
+                <div class="space-y-1">
+                    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium bg-white text-[#00658e] rounded-md shadow-sm transition-transform hover:translate-x-1 duration-150 ease-out" href="#overview">
+                        <span class="material-symbols-outlined text-lg">info</span>
+                        Overview
+                    </a>
+                </div>
+            </div>
+            <div>
+                <h3 class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Technical Guide</h3>
+                <div class="space-y-1">
+                    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-md transition-transform hover:translate-x-1 duration-150 ease-out" href="#three-pillars">
+                        <span class="material-symbols-outlined text-lg">account_tree</span>
+                        Architecture
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-md transition-transform hover:translate-x-1 duration-150 ease-out" href="#lifecycle-flow">
+                        <span class="material-symbols-outlined text-lg">data_object</span>
+                        Lifecycle Flow
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-md transition-transform hover:translate-x-1 duration-150 ease-out" href="#schema-explorer">
+                        <span class="material-symbols-outlined text-lg">code</span>
+                        Agent Schema
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-md transition-transform hover:translate-x-1 duration-150 ease-out" href="#security-model">
+                        <span class="material-symbols-outlined text-lg">security</span>
+                        Security Model
+                    </a>
+                </div>
+            </div>
+            <div>
+                <h3 class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Integration</h3>
+                <div class="space-y-1">
+                    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-md transition-transform hover:translate-x-1 duration-150 ease-out" href="#getting-started">
+                        <span class="material-symbols-outlined text-lg">rocket_launch</span>
+                        Getting Started
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-md transition-transform hover:translate-x-1 duration-150 ease-out" href="#roadmap">
+                        <span class="material-symbols-outlined text-lg">timeline</span>
+                        Roadmap
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 lg:ml-72 lg:mr-64 px-6 md:px-12 lg:px-16 py-12 max-w-5xl overflow-x-hidden">
+        <article class="prose prose-slate max-w-none">
+            
+            <!-- Hero / Overview -->
+            <header class="mb-12 pt-4 scroll-mt-24" id="overview">
+                <div class="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">
+                    <span>Draft v1.0</span>
+                    <span class="material-symbols-outlined text-[10px]">chevron_right</span>
+                    <span>Open Standard</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-6 mt-0">The UI Protocol for <span class="text-primary">AI Agents</span></h1>
+                <p class="text-xl text-slate-600 leading-relaxed font-light mb-8">
+                    HIT enables applications to publish a machine-readable contract of every UI capability-so Agents can navigate and operate software deterministically, without pixel-scraping or fragile CSS selectors.
+                </p>
+
+                <!-- Custom Light Theme Compatible Tree SVG Representation -->
+                <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-6 lg:p-10 mb-8 shadow-sm flex justify-center w-full">
+                    <svg id="hit-tree-svg" class="w-full max-w-xl h-auto" viewBox="0 0 580 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line class="tree-edge" x1="290" y1="64" x2="100" y2="154"/>
+                        <line class="tree-edge" x1="290" y1="64" x2="290" y2="154"/>
+                        <line class="tree-edge" x1="290" y1="64" x2="466" y2="154"/>
+                        <line class="tree-edge" x1="100" y1="198" x2="46" y2="280"/>
+                        <line class="tree-edge" x1="100" y1="198" x2="166" y2="280"/>
+                        <line class="tree-edge" x1="466" y1="198" x2="392" y2="280"/>
+                        <line class="tree-edge" x1="466" y1="198" x2="528" y2="280"/>
+                        
+                        <!-- Root Node -->
+                        <g transform="translate(290,44)">
+                            <rect x="-55" y="-22" width="110" height="44" rx="8" fill="#002f45" opacity="0.95"/>
+                            <text y="4" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="white" font-weight="600">app.root</text>
+                        </g>
+                        <!-- L1 Nodes -->
+                        <g transform="translate(100,176)">
+                            <rect x="-56" y="-22" width="112" height="44" rx="6" fill="#00658e" opacity="0.9"/>
+                            <text y="4" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="white">nav.sidebar</text>
+                        </g>
+                        <g transform="translate(290,176)">
+                            <rect x="-50" y="-22" width="100" height="44" rx="6" fill="#555f6d" opacity="0.9"/>
+                            <text y="4" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="white">main.view</text>
+                        </g>
+                        <g transform="translate(466,176)">
+                            <rect x="-62" y="-22" width="124" height="44" rx="6" fill="#00658e" opacity="0.9"/>
+                            <text y="4" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="white">checkout.form</text>
+                        </g>
+                        <!-- L2 Navigation -->
+                        <g transform="translate(46,298)">
+                            <rect x="-40" y="-18" width="80" height="36" rx="4" fill="#83cfff" opacity="0.8"/>
+                            <text y="4" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#001e2e" font-weight="500">nav.home</text>
+                        </g>
+                        <g transform="translate(166,298)">
+                            <rect x="-40" y="-18" width="80" height="36" rx="4" fill="#83cfff" opacity="0.8"/>
+                            <text y="4" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#001e2e" font-weight="500">nav.tasks</text>
+                        </g>
+                        <!-- L2 Checkout Actions -->
+                        <g transform="translate(392,298)" class="active-node">
+                            <rect x="-58" y="-18" width="116" height="36" rx="4" fill="#00658e" opacity="1"/>
+                            <text y="4" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#ffffff" font-weight="600">checkout.submit</text>
+                        </g>
+                        <g transform="translate(528,298)">
+                            <rect x="-46" y="-18" width="92" height="36" rx="4" fill="#d9e3f4" stroke="#bec8d0" opacity="1"/>
+                            <text y="4" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#121c28">payment.input</text>
+                        </g>
+                        
+                        <!-- Ghost Highlighter Ring (Animated) -->
+                        <rect class="ghost-ring" x="330" y="276" width="124" height="44" rx="6" fill="none"/>
+                        <!-- Center Ripple -->
+                        <circle cx="392" cy="298" r="4" fill="#00658e" opacity="0.6"/>
+                        <circle class="pulse-ring" cx="392" cy="298" r="28" fill="rgba(0, 101, 142, 0.2)" transform-origin="center" style="transform-origin: 392px 298px;"/>
+                        
+                        <!-- Agent Tooltip Badge -->
+                        <rect x="354" y="248" width="76" height="22" rx="4" fill="#002f45"/>
+                        <text x="392" y="263" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="white">🤖 agent</text>
+                    </svg>
+                </div>
+
+                <div class="flex gap-4 items-center mt-6">
+                    <a href="#getting-started" class="bg-primary text-on-primary font-bold px-6 py-3 rounded-md hover:bg-[#004c6c] transition-colors shadow-sm" style="text-decoration: none;">Read the Spec</a>
+                    <a href="#demo" class="text-primary font-bold px-6 py-3 rounded-md hover:bg-primary/5 transition-colors border border-primary/20 bg-white" style="text-decoration: none;">Demo →</a>
+                </div>
+            </header>
+
+            <!-- Video Demo -->
+            <section class="mt-20 pt-8 scroll-mt-24" id="demo">
+                <div class="flex items-center gap-2 text-primary font-bold text-sm tracking-wide mb-2 uppercase">Demo</div>
+                <h2 class="text-3xl font-bold text-slate-900 mb-8 mt-0 border-none">See it in action.</h2>
+                <div class="bg-surface-container-lowest shadow-sm border border-outline-variant/20 rounded-xl overflow-hidden mb-8 p-2">
+                    <video src="gpu_agent_demo.mp4" alt="GPU Store Agent Demo" autoplay loop muted playsinline class="w-full h-auto rounded-lg border border-slate-200"></video>
+                </div>
+            </section>
+            <!-- Architecture / Three Pillars -->
+            <section class="mt-20 pt-8 scroll-mt-24" id="three-pillars">
+                <div class="flex items-center gap-2 text-primary font-bold text-sm tracking-wide mb-2 uppercase">Architecture</div>
+                <h2 class="text-3xl font-bold text-slate-900 mb-8 mt-0 border-none">Three pillars. One contract.</h2>
+                <div class="grid md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100 hover:border-primary/30 transition-colors">
+                        <span class="text-3xl mb-4 block">🌳</span>
+                        <h3 class="font-bold text-slate-900 mb-1 mt-0">The Tree (DIL)</h3>
+                        <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-mono uppercase tracking-widest inline-block mb-3">Data Intent Layer</span>
+                        <p class="text-sm text-slate-500 m-0">A nested JSON structure representing the UI's complete hierarchy. Every interactive element is a Node exposing semantics, schemas, and live state.</p>
+                    </div>
+                    <div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100 hover:border-primary/30 transition-colors">
+                        <span class="text-3xl mb-4 block">📡</span>
+                        <h3 class="font-bold text-slate-900 mb-1 mt-0">Intent Socket</h3>
+                        <span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-mono uppercase tracking-widest inline-block mb-3">Real-Time Stream</span>
+                        <p class="text-sm text-slate-500 m-0">A WebSocket protocol that pushes live state updates (<code>PATCH_STATE</code>) as the UI evolves (e.g. loading states, validation errors). No polling required.</p>
+                    </div>
+                    <div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100 hover:border-primary/30 transition-colors">
+                        <span class="text-3xl mb-4 block">🤖</span>
+                        <h3 class="font-bold text-slate-900 mb-1 mt-0">Agent Portal</h3>
+                        <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-mono uppercase tracking-widest inline-block mb-3">MCP Interface</span>
+                        <p class="text-sm text-slate-500 m-0">The bridge translating standard LLM tool-calling into HIT protocol operations. Fully MCP-compliant via <code>execute_intent</code> and <code>list_nodes</code>.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lifecycle Flow -->
+            <section class="mt-20 pt-8 scroll-mt-24" id="lifecycle-flow">
+                <div class="flex items-center gap-2 text-primary font-bold text-sm tracking-wide mb-2 uppercase">Protocol Flow</div>
+                <h2 class="text-3xl font-bold text-slate-900 mb-8 mt-0 border-none">Discovery → Telemetry → Execution</h2>
+                <div class="bg-surface-container-lowest shadow-sm border border-outline-variant/20 rounded-xl p-8 mb-8">
+                    <ol class="space-y-8 m-0 p-0 list-none relative border-l-2 border-primary/20 ml-3">
+                        <li class="relative pl-8">
+                            <span class="absolute -left-[13px] bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shadow-md shadow-primary/30 mt-[-4px]">1</span>
+                            <div class="mb-1"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phase 1</span></div>
+                            <h4 class="text-lg font-bold text-slate-900 mt-0 mb-3">Discovery</h4>
+                            <div class="space-y-3">
+                                <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <code class="text-[#00658e] font-bold bg-[#00658e]/10 px-2 py-0.5 rounded text-sm">get_tree()</code>
+                                        <span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded">SAFE</span>
+                                    </div>
+                                    <p class="text-sm text-slate-500 m-0 leading-snug">Agent requests the full Hierarchical Intent Tree mapping the complete application capabilities.</p>
+                                </div>
+                                <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <code class="text-[#00658e] font-bold bg-[#00658e]/10 px-2 py-0.5 rounded text-sm">list_nodes(filter)</code>
+                                        <span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded">SAFE</span>
+                                    </div>
+                                    <p class="text-sm text-slate-500 m-0 leading-snug">Agent semantically indexes nodes matching a specific intent boundary.</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="relative pl-8">
+                            <span class="absolute -left-[13px] bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shadow-md shadow-primary/30 mt-[-4px]">2</span>
+                            <div class="mb-1"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phase 2</span></div>
+                            <h4 class="text-lg font-bold text-slate-900 mt-0 mb-3">Telemetry</h4>
+                            <div class="space-y-3">
+                                <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <code class="text-[#00658e] font-bold bg-[#00658e]/10 px-2 py-0.5 rounded text-sm">focus_node(uid)</code>
+                                        <span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded">SAFE</span>
+                                    </div>
+                                    <p class="text-sm text-slate-500 m-0 leading-snug">Agent signals intention. The GUI visually engages the "Ghost Highlight" for the human observer.</p>
+                                </div>
+                                <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <code class="text-indigo-600 font-bold bg-indigo-100 px-2 py-0.5 rounded text-sm">PATCH_STATE</code>
+                                        <span class="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded">STREAM</span>
+                                    </div>
+                                    <p class="text-sm text-slate-500 m-0 leading-snug">The app pushes real-time visual state updates (loading, success, errors) back to the Agent.</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="relative pl-8 border-transparent">
+                            <span class="absolute -left-[13px] bg-primary text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shadow-md shadow-primary/30 mt-[-4px]">3</span>
+                            <div class="mb-1"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phase 3</span></div>
+                            <h4 class="text-lg font-bold text-slate-900 mt-0 mb-3">Execution</h4>
+                            <div class="space-y-3">
+                                <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <code class="text-purple-700 font-bold bg-purple-100 px-2 py-0.5 rounded text-sm">call_action()</code>
+                                        <span class="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded">MEDIUM RISK</span>
+                                    </div>
+                                    <p class="text-sm text-slate-500 m-0 leading-snug">Agent triggers a rigidly defined structural action declared on the active node.</p>
+                                </div>
+                                <div class="bg-red-50 rounded-lg p-4 border border-red-100 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <code class="text-red-700 font-bold bg-red-100 px-2 py-0.5 rounded text-sm">Guardrail</code>
+                                        <span class="text-[10px] font-bold bg-red-600 text-white px-2 py-0.5 rounded shadow-sm">HIGH RISK</span>
+                                    </div>
+                                    <p class="text-sm text-red-900/80 m-0 font-medium leading-snug">If the action carries high risk, the server pauses execution pending physical Human confirmation.</p>
+                                </div>
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Schema Explorer -->
+            <section class="mt-20 pt-8 scroll-mt-24" id="schema-explorer">
+                <div class="flex items-center gap-2 text-primary font-bold text-sm tracking-wide mb-2 uppercase">Reference</div>
+                <h2 class="text-3xl font-bold text-slate-900 mb-8 mt-0 border-none">The Agentic Schema</h2>
+                <p class="mb-6 text-slate-600">A HIT Node is the atomic unit of the protocol, a structured, localized specification of a user interface capability.</p>
+                
+                <div class="bg-surface-container-lowest border border-slate-200 rounded-xl overflow-hidden shadow-sm" id="schema-explorer-module">
+                    <div class="flex border-b border-slate-200 bg-slate-50 px-2 pt-2 gap-1 overflow-x-auto" id="schema-tabs">
+                        <button class="schema-tab active text-sm px-4 py-2 border border-b-0 rounded-t-lg shadow-[0_-2px_4px_rgba(0,0,0,0.02)]" data-tab="full">Full Schema</button>
+                        <button class="schema-tab text-sm px-4 py-2 text-slate-500 hover:text-slate-800 border border-transparent rounded-t-lg" data-tab="intent">Intent</button>
+                        <button class="schema-tab text-sm px-4 py-2 text-slate-500 hover:text-slate-800 border border-transparent rounded-t-lg" data-tab="state">State</button>
+                        <button class="schema-tab text-sm px-4 py-2 text-slate-500 hover:text-slate-800 border border-transparent rounded-t-lg" data-tab="actions">Actions</button>
+                    </div>
+                    <div class="p-6 overflow-x-auto bg-[#fafbfc]">
+                        <div id="schema-content" class="schema-json"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Security Model -->
+            <section class="mt-20 pt-8 scroll-mt-24" id="security-model">
+                <div class="flex items-center gap-2 text-primary font-bold text-sm tracking-wide mb-2 uppercase">Privacy & Control</div>
+                <h2 class="text-3xl font-bold text-slate-900 mb-8 mt-0 border-none">Built for human oversight</h2>
+                <p class="mb-8 text-slate-600">Agent access is fundamentally constrained by what exactly the application developers explicitly register.</p>
+                <div class="grid sm:grid-cols-2 gap-4 mb-8">
+                    <div class="bg-surface-container-lowest p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-2xl mb-3 block opacity-80">🔭</span>
+                        <h4 class="font-bold text-slate-900 m-0 mb-2">Scoped Visibility</h4>
+                        <p class="text-sm text-slate-500 m-0 leading-snug">The tree exposes nodes strictly based on the User's active permission scope. Secrets are completely unmapped.</p>
+                    </div>
+                    <div class="bg-surface-container-lowest p-6 rounded-xl border border-red-100 bg-red-50/30 shadow-sm">
+                        <span class="text-2xl mb-3 block opacity-80">🛑</span>
+                        <h4 class="font-bold text-red-900 m-0 mb-2">The Kill Switch</h4>
+                        <p class="text-sm text-red-900/70 m-0 leading-snug">A globally bound intervention mechanism. Disconnects the socket intercepting Agent commands instantly.</p>
+                    </div>
+                    <div class="bg-surface-container-lowest p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-2xl mb-3 block opacity-80">⚠️</span>
+                        <h4 class="font-bold text-slate-900 m-0 mb-2">Risk Guardrails</h4>
+                        <p class="text-sm text-slate-500 m-0 leading-snug">Tags declare risk logic natively. High-risk methods trigger a server-bound interruption requiring Human approval.</p>
+                    </div>
+                    <div class="bg-surface-container-lowest p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <span class="text-2xl mb-3 block opacity-80">🔒</span>
+                        <h4 class="font-bold text-slate-900 m-0 mb-2">Deterministic Input</h4>
+                        <p class="text-sm text-slate-500 m-0 leading-snug">Agents cannot arbitrarily hallucinate inputs. Form schemas dictate strict types and valid enum lists.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Getting Started -->
+            <section class="mt-20 pt-8 scroll-mt-24" id="getting-started">
+                <div class="flex items-center gap-2 text-primary font-bold text-sm tracking-wide mb-2 uppercase">Integration</div>
+                <h2 class="text-3xl font-bold text-slate-900 mb-8 mt-0 border-none">Add HIT to your app in 4 steps</h2>
+                <div class="space-y-6">
+                    <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-slate-100 border-b border-slate-200 px-4 py-2 flex items-center gap-2">
+                            <div class="flex gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span></div>
+                            <span class="text-xs font-bold text-slate-500 font-mono ml-4">1. Include the SDK</span>
+                        </div>
+                        <div class="bg-[#fafbfc] p-4 overflow-x-auto">
+                            <pre class="m-0 text-sm font-mono text-slate-800"><span class="text-slate-400 italic">&lt;!-- Zero dependencies. Drop it into your bundle. --&gt;</span>
+&lt;<span class="text-[#00658e]">script</span> <span class="text-[#8a0c20]">src</span>=<span class="text-[#02488a]">"https://unpkg.com/@hit-protocol/core/dist/browser.js"</span>&gt;&lt;/<span class="text-[#00658e]">script</span>&gt;</pre>
+                        </div>
+                    </div>
+                    <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-slate-100 border-b border-slate-200 px-4 py-2 flex items-center gap-2">
+                            <div class="flex gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span></div>
+                            <span class="text-xs font-bold text-slate-500 font-mono ml-4">2. Register an interactive element</span>
+                        </div>
+                        <div class="bg-[#fafbfc] p-4 overflow-x-auto">
+                            <pre class="m-0 text-sm font-mono text-slate-800"><span class="text-[#00658e] font-bold">HIT</span>.<span class="text-purple-700">register</span>(<span class="text-[#02488a]">'checkout.submit'</span>, {
+  <span class="text-[#8a0c20]">role</span>: <span class="text-[#02488a]">'action'</span>,
+  <span class="text-[#8a0c20]">intent</span>: {
+    domain: <span class="text-[#02488a]">'commerce'</span>,
+    action: <span class="text-[#02488a]">'submit'</span>,
+    object: <span class="text-[#02488a]">'order'</span>
+  },
+  <span class="text-[#8a0c20]">actions</span>: [{
+    name: <span class="text-[#02488a]">'execute'</span>,
+    risk: <span class="text-[#02488a]">'high'</span>,
+    handler: <span class="font-bold text-slate-900">async</span> (payload) =&gt; ({
+      order_id: <span class="font-bold text-slate-900 mt-0">await</span> processOrder(payload)
+    })
+  }]
+}, <span class="text-[#00658e] font-bold">document</span>.getElementById(<span class="text-[#02488a]">'btn-submit'</span>));</pre>
+                        </div>
+                    </div>
+                    <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-slate-100 border-b border-slate-200 px-4 py-2 flex items-center gap-2">
+                            <div class="flex gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span></div>
+                            <span class="text-xs font-bold text-slate-500 font-mono ml-4">3. Run the Local Broker (Optional)</span>
+                        </div>
+                        <div class="bg-[#fafbfc] p-4 overflow-x-auto">
+                            <pre class="m-0 text-sm font-mono text-slate-800"><span class="text-slate-400 italic"># Terminal</span>
+docker run -p 8080:8080 -p 8081:8081 buto007/hit-relay-core</pre>
+                        </div>
+                        <div class="bg-white border-t border-slate-100 px-4 py-3 text-xs text-slate-500">
+                            The HIT-Relay-Core manages the WebSockets and broadcasts State events between the browser UI and AI Agents. 
+                        </div>
+                    </div>
+                    <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm mt-6">
+                        <div class="bg-slate-100 border-b border-slate-200 px-4 py-2 flex items-center gap-2">
+                            <div class="flex gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-primary/40"></span><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span class="w-2.5 h-2.5 rounded-full bg-green-400"></span></div>
+                            <span class="text-xs font-bold text-slate-500 font-mono ml-4">4. Agent Execution (MCP)</span>
+                        </div>
+                        <div class="bg-[#fafbfc] p-4 overflow-x-auto">
+                            <pre class="m-0 text-sm font-mono text-slate-800"><span class="text-slate-400 italic">// 1. Agent discovers the capability</span>
+<span class="text-slate-900 font-bold">const</span> nodes = <span class="text-[#00658e] font-bold">HIT</span>.AgentPortal.<span class="text-purple-700">list_nodes</span>();
+
+<span class="text-slate-400 italic">// 2. Agent isolates focus dynamically</span>
+<span class="text-[#00658e] font-bold">HIT</span>.Manager.<span class="text-purple-700">focusNode</span>(<span class="text-[#02488a]">'checkout.submit'</span>);
+
+<span class="text-slate-400 italic">// 3. Agent passes parameters. High risk fires Guardrail!</span>
+<span class="text-slate-900 font-bold">const</span> receipt = <span class="text-slate-900 font-bold">await</span> <span class="text-[#00658e] font-bold">HIT</span>.AgentPortal.<span class="text-purple-700">execute_intent</span>(
+  <span class="text-[#02488a]">'commerce.submit.order'</span>,
+  { confirm: <span class="text-[#00658e] font-bold">true</span> }
+);</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Roadmap -->
+            <section class="mt-20 pt-8 scroll-mt-24" id="roadmap">
+                <div class="flex items-center gap-2 text-primary font-bold text-sm tracking-wide mb-2 uppercase">Future Vision</div>
+                <h2 class="text-3xl font-bold text-slate-900 mb-8 mt-0 border-none">From Alpha to Standard</h2>
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <div class="bg-surface-container-lowest p-6 rounded-xl border-t-4 border-t-primary border border-slate-200 shadow-sm relative">
+                        <div class="absolute -top-3 right-4 bg-primary text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded tracking-widest shadow-sm">Done</div>
+                        <div class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">v1.0-ALPHA</div>
+                        <h4 class="text-lg font-bold text-slate-900 m-0 mb-3">The Provider</h4>
+                        <ul class="text-sm text-slate-600 space-y-2 m-0 p-0 list-none">
+                            <li class="flex items-center gap-2"><span class="text-green-500 material-symbols-outlined text-sm">check_circle</span> Core Node registration SDK</li>
+                            <li class="flex items-center gap-2"><span class="text-green-500 material-symbols-outlined text-sm">check_circle</span> React Component Hooks</li>
+                            <li class="flex items-center gap-2"><span class="text-green-500 material-symbols-outlined text-sm">check_circle</span> Risk Guardrails</li>
+                        </ul>
+                    </div>
+                    <div class="bg-surface-container-lowest p-6 rounded-xl border border-slate-200 shadow-sm relative">
+                        <div class="absolute -top-3 right-4 bg-indigo-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded tracking-widest shadow-sm">Next Up</div>
+                        <div class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">v1.0-BETA</div>
+                        <h4 class="text-lg font-bold text-slate-900 m-0 mb-3">The Bridge</h4>
+                        <ul class="text-sm text-slate-600 space-y-2 m-0 p-0 list-none">
+                            <li class="flex items-center gap-2"><span class="text-green-500 material-symbols-outlined text-sm">check_circle</span> Node.js WebSocket Engine & Local Broker</li>
+                            <li class="flex items-center gap-2"><span class="text-slate-300 material-symbols-outlined text-sm">radio_button_unchecked</span> Vue / Svelte Integrations</li>
+                            <li class="flex items-center gap-2"><span class="text-slate-300 material-symbols-outlined text-sm">radio_button_unchecked</span> Multi-Client State</li>
+                        </ul>
+                    </div>
+                    <div class="bg-surface-container-lowest p-6 rounded-xl border border-slate-200 shadow-sm relative opacity-80">
+                        <div class="absolute -top-3 right-4 bg-slate-300 text-slate-700 text-[10px] font-bold uppercase px-2 py-0.5 rounded tracking-widest shadow-sm">Future</div>
+                        <div class="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">v1.0-FINAL</div>
+                        <h4 class="text-lg font-bold text-slate-900 m-0 mb-3">The Standard</h4>
+                        <ul class="text-sm text-slate-600 space-y-2 m-0 p-0 list-none">
+                            <li class="flex items-center gap-2"><span class="text-slate-300 material-symbols-outlined text-sm">radio_button_unchecked</span> NPM Publish Registry</li>
+                            <li class="flex items-center gap-2"><span class="text-slate-300 material-symbols-outlined text-sm">radio_button_unchecked</span> Core Conformance Suite</li>
+                            <li class="flex items-center gap-2"><span class="text-slate-300 material-symbols-outlined text-sm">radio_button_unchecked</span> Community Governing Board</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Feedback Section -->
+            <div class="mt-24 pt-8 border-t border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-6 mb-20">
+                <div>
+                    <h4 class="text-sm font-bold text-slate-900 mb-1 mt-0">Was this protocol specification helpful?</h4>
+                    <p class="text-xs text-slate-500 m-0">Leave feedback to guide the direction of v1.0.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors">
+                        <span class="material-symbols-outlined text-lg">thumb_up</span> Yes
+                    </button>
+                    <button class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors">
+                        <span class="material-symbols-outlined text-lg">thumb_down</span> No
+                    </button>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <!-- Right TOC Sidebar -->
+    <aside class="fixed right-0 top-16 h-[calc(100vh-4rem)] w-64 hidden xl:block p-8 bg-surface border-l border-slate-100 z-30 overflow-y-auto">
+        <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">On this page</h3>
+        <ul id="right-toc" class="space-y-3 text-sm border-l-2 border-slate-100 pl-4 py-1 list-none m-0 ml-1">
+            <li class="relative">
+                <a class="block text-slate-500 hover:text-slate-900 transition-colors -ml-4 pl-4 border-l-2 border-transparent hover:border-slate-300" href="#overview">Overview</a>
+            </li>
+            <li class="relative">
+                <a class="block text-slate-500 hover:text-slate-900 transition-colors -ml-4 pl-4 border-l-2 border-transparent hover:border-slate-300" href="#three-pillars">Architecture</a>
+            </li>
+            <li class="relative">
+                <a class="block text-slate-500 hover:text-slate-900 transition-colors -ml-4 pl-4 border-l-2 border-transparent hover:border-slate-300" href="#lifecycle-flow">Lifecycle Flow</a>
+            </li>
+            <li class="relative">
+                <a class="block text-slate-500 hover:text-slate-900 transition-colors -ml-4 pl-4 border-l-2 border-transparent hover:border-slate-300" href="#schema-explorer">Agent Schema</a>
+            </li>
+            <li class="relative">
+                <a class="block text-slate-500 hover:text-slate-900 transition-colors -ml-4 pl-4 border-l-2 border-transparent hover:border-slate-300" href="#security-model">Security Model</a>
+            </li>
+            <li class="relative">
+                <a class="block text-slate-500 hover:text-slate-900 transition-colors -ml-4 pl-4 border-l-2 border-transparent hover:border-slate-300" href="#getting-started">Getting Started</a>
+            </li>
+            <li class="relative">
+                <a class="block text-slate-500 hover:text-slate-900 transition-colors -ml-4 pl-4 border-l-2 border-transparent hover:border-slate-300" href="#roadmap">Roadmap</a>
+            </li>
+        </ul>
+        <div class="mt-12 pt-8 border-t border-slate-100">
+            <a class="flex items-center gap-2 text-slate-400 hover:text-[#00658e] transition-colors text-xs font-medium" href="https://github.com/hit-protocol/core" target="_blank" style="text-decoration: none;">
+                <span class="material-symbols-outlined text-[16px]">edit</span> Edit this page on GitHub
+            </a>
+        </div>
+    </aside>
+</div>
+
+<!-- Footer -->
+<footer class="w-full border-t border-slate-200 bg-[#f9f9f9] z-40 relative mt-auto">
+    <div class="max-w-7xl mx-auto py-12 px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="flex items-center gap-8">
+            <span class="text-xs uppercase tracking-widest font-semibold text-slate-500">© 2026 HIT Protocol Standards Board</span>
+        </div>
+        <div class="flex gap-6 flex-wrap justify-center">
+            <a class="text-xs uppercase tracking-widest font-semibold text-slate-500 hover:text-[#00658e] transition-colors" href="#">Draft v1.0</a>
+            <a class="text-xs uppercase tracking-widest font-semibold text-slate-500 hover:text-[#00658e] transition-colors" href="#">MIT License</a>
+            
+            <a class="text-xs uppercase tracking-widest font-semibold text-slate-500 hover:text-[#00658e] transition-colors" href="https://github.com">GitHub</a>
+        </div>
+    </div>
+</footer>
+
+<script src="schema-explorer.js"></script>
+<script>
+// Highlight Right TOC active links gracefully based on scroll
+document.addEventListener('DOMContentLoaded', () => {
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute('id');
+                const link = document.querySelector(`#right-toc a[href="#${id}"]`);
+                if (link) {
+                    document.querySelectorAll('#right-toc a').forEach(a => {
+                        a.classList.remove('text-primary', 'border-primary', 'font-medium');
+                        a.classList.add('text-slate-500', 'border-transparent');
+                    });
+                    link.classList.add('text-primary', 'border-primary', 'font-medium');
+                    link.classList.remove('text-slate-500', 'border-transparent');
+                }
+            }
+        });
+    }, { rootMargin: "0px 0px -70% 0px", threshold: 0.1 });
+
+    ['overview', 'three-pillars', 'lifecycle-flow', 'schema-explorer', 'security-model', 'getting-started', 'roadmap'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el);
+    });
+});
+</script>
+</body></html>
