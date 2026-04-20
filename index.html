@@ -1,15 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="light" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>HIT-1.0 | Agent UI Navigation, MCP & QA Automation Protocol</title>
-<meta name="description" content="HIT-1.0 (Hierarchical Intent Tree Protocol) is an open-source standard and Model Context Protocol (MCP) toolset for agentic UI navigation, reliable QA automation, and end-to-end browser testing." />
-<meta name="keywords" content="agent UI navigation, QA automation, end-to-end testing, MCP, Model Context Protocol, browser automation, HIT protocol, hierarchical intent tree, autonomous agent" />
-<meta property="og:title" content="HIT-1.0 | Agent UI Navigation, MCP & QA Automation Protocol" />
-<meta property="og:description" content="Open-source protocol for reliable semantic agent UI navigation, QA testing, and browser automation." />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://hitprotocol.org/" />
-<link rel="canonical" href="https://hitprotocol.org/" />
+<title>HIT-1.0 - Hierarchical Intent Tree Protocol</title>
 
 <!-- Tailwind CSS via CDN -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -177,7 +170,7 @@
         <div class="hidden lg:flex items-center bg-surface-container px-3 py-1.5 rounded-md text-slate-500 gap-2 border border-outline-variant/20">
             <span class="material-symbols-outlined text-sm">search</span>
             <span class="text-xs">Search specification...</span>
-            <span class="text-[10px] bg-white border border-slate-200 px-1 rounded ml-4">âŒ˜K</span>
+            <span class="text-[10px] bg-white border border-slate-200 px-1 rounded ml-4">⌘K</span>
         </div>
         <a href="https://github.com" target="_blank" class="p-2 text-slate-600 hover:bg-slate-50 rounded-md transition-colors" title="GitHub"><span class="material-symbols-outlined">code</span></a>
         <button class="p-2 text-slate-600 hover:bg-slate-50 rounded-md transition-colors" title="Community"><span class="material-symbols-outlined">group</span></button>
@@ -310,13 +303,13 @@
                         
                         <!-- Agent Tooltip Badge -->
                         <rect x="354" y="248" width="76" height="22" rx="4" fill="#002f45"/>
-                        <text x="392" y="263" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="white">ðŸ¤– agent</text>
+                        <text x="392" y="263" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="white">🤖 agent</text>
                     </svg>
                 </div>
 
                 <div class="flex gap-4 items-center mt-6">
                     <a href="#getting-started" class="bg-primary text-on-primary font-bold px-6 py-3 rounded-md hover:bg-[#004c6c] transition-colors shadow-sm" style="text-decoration: none;">Read the Spec</a>
-                    <a href="#demo" class="text-primary font-bold px-6 py-3 rounded-md hover:bg-primary/5 transition-colors border border-primary/20 bg-white" style="text-decoration: none;">Demo â†’</a>
+                    <a href="#demo" class="text-primary font-bold px-6 py-3 rounded-md hover:bg-primary/5 transition-colors border border-primary/20 bg-white" style="text-decoration: none;">Demo →</a>
                 </div>
             </header>
 
@@ -334,19 +327,19 @@
                 <h2 class="text-3xl font-bold text-slate-900 mb-8 mt-0 border-none">Three pillars. One contract.</h2>
                 <div class="grid md:grid-cols-3 gap-6 mb-8">
                     <div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100 hover:border-primary/30 transition-colors">
-                        <span class="text-3xl mb-4 block">ðŸŒ³</span>
+                        <span class="text-3xl mb-4 block">🌳</span>
                         <h3 class="font-bold text-slate-900 mb-1 mt-0">The Tree (DIL)</h3>
                         <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-mono uppercase tracking-widest inline-block mb-3">Data Intent Layer</span>
                         <p class="text-sm text-slate-500 m-0">A nested JSON structure representing the UI's complete hierarchy. Every interactive element is a Node exposing semantics, schemas, and live state.</p>
                     </div>
                     <div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100 hover:border-primary/30 transition-colors">
-                        <span class="text-3xl mb-4 block">ðŸ“¡</span>
+                        <span class="text-3xl mb-4 block">📡</span>
                         <h3 class="font-bold text-slate-900 mb-1 mt-0">Intent Socket</h3>
                         <span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-mono uppercase tracking-widest inline-block mb-3">Real-Time Stream</span>
                         <p class="text-sm text-slate-500 m-0">A WebSocket protocol that pushes live state updates (<code>PATCH_STATE</code>) as the UI evolves (e.g. loading states, validation errors). No polling required.</p>
                     </div>
                     <div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-100 hover:border-primary/30 transition-colors">
-                        <span class="text-3xl mb-4 block">ðŸ¤–</span>
+                        <span class="text-3xl mb-4 block">🤖</span>
                         <h3 class="font-bold text-slate-900 mb-1 mt-0">Agent Portal</h3>
                         <span class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded font-mono uppercase tracking-widest inline-block mb-3">MCP Interface</span>
                         <p class="text-sm text-slate-500 m-0">The bridge translating standard LLM tool-calling into HIT protocol operations. Fully MCP-compliant via <code>execute_intent</code> and <code>list_nodes</code>.</p>
@@ -357,7 +350,7 @@
             <!-- Lifecycle Flow -->
             <section class="mt-20 pt-8 scroll-mt-24" id="lifecycle-flow">
                 <div class="flex items-center gap-2 text-primary font-bold text-sm tracking-wide mb-2 uppercase">Protocol Flow</div>
-                <h2 class="text-3xl font-bold text-slate-900 mb-8 mt-0 border-none">Discovery â†’ Telemetry â†’ Execution</h2>
+                <h2 class="text-3xl font-bold text-slate-900 mb-8 mt-0 border-none">Discovery → Telemetry → Execution</h2>
                 <div class="bg-surface-container-lowest shadow-sm border border-outline-variant/20 rounded-xl p-8 mb-8">
                     <ol class="space-y-8 m-0 p-0 list-none relative border-l-2 border-primary/20 ml-3">
                         <li class="relative pl-8">
@@ -453,22 +446,22 @@
                 <p class="mb-8 text-slate-600">Agent access is fundamentally constrained by what exactly the application developers explicitly register.</p>
                 <div class="grid sm:grid-cols-2 gap-4 mb-8">
                     <div class="bg-surface-container-lowest p-6 rounded-xl border border-slate-200 shadow-sm">
-                        <span class="text-2xl mb-3 block opacity-80">ðŸ”­</span>
+                        <span class="text-2xl mb-3 block opacity-80">🔭</span>
                         <h4 class="font-bold text-slate-900 m-0 mb-2">Scoped Visibility</h4>
                         <p class="text-sm text-slate-500 m-0 leading-snug">The tree exposes nodes strictly based on the User's active permission scope. Secrets are completely unmapped.</p>
                     </div>
                     <div class="bg-surface-container-lowest p-6 rounded-xl border border-red-100 bg-red-50/30 shadow-sm">
-                        <span class="text-2xl mb-3 block opacity-80">ðŸ›‘</span>
+                        <span class="text-2xl mb-3 block opacity-80">🛑</span>
                         <h4 class="font-bold text-red-900 m-0 mb-2">The Kill Switch</h4>
                         <p class="text-sm text-red-900/70 m-0 leading-snug">A globally bound intervention mechanism. Disconnects the socket intercepting Agent commands instantly.</p>
                     </div>
                     <div class="bg-surface-container-lowest p-6 rounded-xl border border-slate-200 shadow-sm">
-                        <span class="text-2xl mb-3 block opacity-80">âš ï¸</span>
+                        <span class="text-2xl mb-3 block opacity-80">⚠️</span>
                         <h4 class="font-bold text-slate-900 m-0 mb-2">Risk Guardrails</h4>
                         <p class="text-sm text-slate-500 m-0 leading-snug">Tags declare risk logic natively. High-risk methods trigger a server-bound interruption requiring Human approval.</p>
                     </div>
                     <div class="bg-surface-container-lowest p-6 rounded-xl border border-slate-200 shadow-sm">
-                        <span class="text-2xl mb-3 block opacity-80">ðŸ”’</span>
+                        <span class="text-2xl mb-3 block opacity-80">🔒</span>
                         <h4 class="font-bold text-slate-900 m-0 mb-2">Deterministic Input</h4>
                         <p class="text-sm text-slate-500 m-0 leading-snug">Agents cannot arbitrarily hallucinate inputs. Form schemas dictate strict types and valid enum lists.</p>
                     </div>
@@ -642,7 +635,7 @@ docker run -p 8080:8080 -p 8081:8081 buto007/hit-relay-core</pre>
 <footer class="w-full border-t border-slate-200 bg-[#f9f9f9] z-40 relative mt-auto">
     <div class="max-w-7xl mx-auto py-12 px-8 flex flex-col md:flex-row justify-between items-center gap-6">
         <div class="flex flex-col gap-2">
-            <span class="text-xs uppercase tracking-widest font-semibold text-slate-500">© 2026 HIT Protocol</span>
+            <span class="text-xs uppercase tracking-widest font-semibold text-slate-500">� 2026 HIT Protocol</span>
             <span class="text-[10px] font-medium text-slate-400">Built and currently managed by Kudzayi Allan Mabuto, AI Engineer & Data Scientist</span>
         </div>
         <div class="flex gap-6 flex-wrap justify-center items-center">
@@ -682,5 +675,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 </body></html>
-
-
