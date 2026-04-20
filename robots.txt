@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hitprotocol.org/sitemap.xml
+Sitemap: https://www.hitprotocol.org/sitemap.xml
